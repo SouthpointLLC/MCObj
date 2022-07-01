@@ -6,18 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import net.minecraft.client.render.model.ModelRotation;
-import net.minecraft.client.util.math.AffineTransformation;
-import net.minecraft.client.util.math.Vector3f;
-import net.minecraft.client.util.math.Vector4f;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Matrix3f;
-import net.minecraft.util.math.Matrix4f;
-
 import com.google.gson.Gson;
-
 import com.tom.mcobj.Access;
 import com.tom.mcobj.forge.Fabric.IModelState;
+
+import net.minecraft.client.render.model.ModelRotation;
+import net.minecraft.util.math.*;
 
 /*
  * Interpolation-friendly affine transformation.
@@ -89,9 +83,9 @@ public class TRSRTransformation implements IModelState {
 		return identity;
 	}
 
-	public void transformNormal(Vector3f normal) {
-		//normalTransform.transform(normal);
-		//normal.normalize();
+	public void transformNormal(Vec3f normal) {
+	    normal.transform(normalTransform);
+		normal.normalize();
 	}
 
 	@Override

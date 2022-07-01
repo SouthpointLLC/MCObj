@@ -1,6 +1,7 @@
 package com.tom.mcobj;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -51,14 +52,14 @@ public class EntityModelLoader {
 				Map<String, Object> json = gson.fromJson(reader, Map.class);
 
 				IOUtils.closeQuietly(reader);
-				IOUtils.closeQuietly(iresource);
+				IOUtils.closeQuietly(iresource.getInputStream());
 				reader = null;
 				iresource = null;
 
 				if(json.containsKey("model")){
 					Identifier rl = new Identifier(String.valueOf(json.get("model")));
 					if(rl.getPath().endsWith(".obj")){
-						iresource = this.resourceManager.getResource(new Identifier(rl.getNamespace(), "models/redef/" + rl.getPath()));
+						iresource = this.resourceManager.getResource(new Identifier(rl.getNamespace(), "models/redef/" + rl.getPath())).orElse(null);
 						reader = new InputStreamReader(iresource.getInputStream(), StandardCharsets.UTF_8);
 						models.put(name, new ObjModel(new BufferedReader(reader)));
 						System.out.println(name);
@@ -73,7 +74,11 @@ public class EntityModelLoader {
 				e.printStackTrace();
 			} finally {
 				IOUtils.closeQuietly(reader);
-				IOUtils.closeQuietly(iresource);
+				try {
+                    IOUtils.closeQuietly(iresource.getInputStream());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 			}
 		}
 	}

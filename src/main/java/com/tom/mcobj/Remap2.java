@@ -4,15 +4,15 @@ import static com.tom.mcobj.MCObjInit.log;
 
 import java.util.List;
 
+import com.tom.mcobj.forge.VertexC;
+import com.tom.mcobj.proxy.ClientProxy;
+
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.model.ModelPart.Cuboid;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.util.math.Vec2f;
-
-import com.tom.mcobj.forge.VertexC;
-import com.tom.mcobj.proxy.ClientProxy;
+import net.minecraft.util.math.Vec3f;
 
 public class Remap2 {
 
@@ -30,14 +30,14 @@ public class Remap2 {
 			if(m == null)
 				return false;
 			else {
-				VertexC vc = new VertexC(matrix4f_1.getModel(), vertexConsumer_1, float_1, int_1, int_2, float_2, float_3, float_4);
+				VertexC vc = new VertexC(matrix4f_1.getPositionMatrix(), vertexConsumer_1, float_1, int_1, int_2, float_2, float_3, float_4);
 				for(int i = 0; i < cuboids.size(); ++i) {
 					vc.push();
 					Cuboid box = cuboids.get(i);
 					float dx = box.maxX - box.minX;
 					float dy = box.maxY - box.minY;
 					float dz = box.maxZ - box.minZ;
-					Vector3f delta = Access.Fdelta(box);
+					Vec3f delta = Access.Fdelta(box);
 					vc.translate((box.minX - delta.getX()) / 16f, (box.minY - delta.getY()) / 16f, (box.minZ - delta.getZ()) / 16f);
 					vc.scale((dx + delta.getX()*2)/16f, (dy + delta.getY()*2)/16f, (dz + delta.getZ()*2)/16f);
 					int texU = Access.FtexU(box);
@@ -90,7 +90,7 @@ public class Remap2 {
 				return true;
 			}
 		}else{
-			VertexC vc = new VertexC(matrix4f_1.getModel(), vertexConsumer_1, float_1, int_1, int_2, float_2, float_3, float_4);
+			VertexC vc = new VertexC(matrix4f_1.getPositionMatrix(), vertexConsumer_1, float_1, int_1, int_2, float_2, float_3, float_4);
 			vc.push();
 			vc.translate(-pivotX / 16, -pivotY / 16, -pivotZ / 16);
 			vc.scale(-1, -1, 1);

@@ -1,12 +1,14 @@
 package net.fabricmc.fabric.impl.client.indigo.renderer.render;
 
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import com.tom.mcobj.forge.BakedQuadBuilder.NBakedQuad;
+
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
+import net.fabricmc.fabric.impl.client.indigo.Indigo;
 import net.fabricmc.fabric.impl.client.indigo.renderer.IndigoRenderer;
 import net.fabricmc.fabric.impl.client.indigo.renderer.RenderMaterialImpl.Value;
 import net.fabricmc.fabric.impl.client.indigo.renderer.helper.GeometryHelper;
@@ -15,12 +17,11 @@ import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Matrix3f;
 import net.minecraft.util.math.Matrix4f;
-
-import com.tom.mcobj.forge.BakedQuadBuilder.NBakedQuad;
+import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.random.Random;
 
 public class ObjQuadRenderer extends AbstractQuadRenderer implements Consumer<BakedModel> {
 	private static Value MATERIAL_FLAT = (Value) IndigoRenderer.INSTANCE.materialFinder().disableAo(0, true).find();
@@ -51,10 +52,10 @@ public class ObjQuadRenderer extends AbstractQuadRenderer implements Consumer<Ba
 		}
 
 		@Override
-		public Vector3f copyNormal(int vertexIndex, Vector3f target) {
+		public Vec3f copyNormal(int vertexIndex, Vec3f target) {
 			if(hasNormal(vertexIndex)) {
 				if(target == null) {
-					target = new Vector3f();
+					target = new Vec3f();
 				}
 				//final int normal = data[vertexStart() + vertexIndex];
 				target.set(x, y, z);
@@ -101,7 +102,7 @@ public class ObjQuadRenderer extends AbstractQuadRenderer implements Consumer<Ba
 	private void renderQuad(NBakedQuad quad, Direction cullFace, Value defaultMaterial) {
 		final int[] vertexData = quad.getVertexData();
 
-		if(!CompatibilityHelper.canRender(vertexData)) {
+		if(!canRender(vertexData)) {
 			return;
 		}
 
@@ -110,7 +111,8 @@ public class ObjQuadRenderer extends AbstractQuadRenderer implements Consumer<Ba
 		System.arraycopy(vertexData, 0, editorBuffer, EncodingFormat.HEADER_STRIDE, EncodingFormat.QUAD_STRIDE);
 		editorQuad.cullFace(cullFace);
 		final Direction lightFace = quad.getFace();
-		editorQuad.lightFace(lightFace);
+		//editorQuad.lightFace(lightFace);
+        //TODO
 		editorQuad.nominalFace(lightFace);
 		editorQuad.colorIndex(quad.getColorIndex());
 		editorQuad.material(defaultMaterial);
@@ -121,22 +123,23 @@ public class ObjQuadRenderer extends AbstractQuadRenderer implements Consumer<Ba
 
 		if (editorQuad.material().disableAo(0)) {
 			// needs to happen before offsets are applied
-			editorQuad.invalidateShape();
+			editorQuad.clear();
 			aoCalc.compute(editorQuad, true);
-			tesselateSmooth(editorQuad, blockInfo.defaultLayer, editorQuad.colorIndex());
+			tessellateSmooth(editorQuad, blockInfo.defaultLayer, editorQuad.colorIndex());
 		} else {
 			// vanilla compatibility hack
 			// For flat lighting, cull face drives everything and light face is ignored.
 			if (cullFace == null) {
-				editorQuad.invalidateShape();
+				editorQuad.clear();
 				// Can't rely on lazy computation in tesselateFlat() because needs to happen before offsets are applied
 				editorQuad.geometryFlags();
 			} else {
-				editorQuad.geometryFlags(GeometryHelper.LIGHT_FACE_FLAG);
-				editorQuad.lightFace(cullFace);
+				//editorQuad.geometryFlags(GeometryHelper.LIGHT_FACE_FLAG);
+				//editorQuad.lightFace(cullFace);
+			    //TODO
 			}
 
-			tesselateFlat(editorQuad, blockInfo.defaultLayer, editorQuad.colorIndex());
+			tessellateFlat(editorQuad, blockInfo.defaultLayer, editorQuad.colorIndex());
 		}
 	}
 
@@ -154,4 +157,20 @@ public class ObjQuadRenderer extends AbstractQuadRenderer implements Consumer<Ba
 	protected int overlay() {
 		return tfbc.overlay();
 	}
+
+    private static boolean logCompatibilityWarning = true;
+    private static boolean isCompatible(int[] vertexData) {
+        final boolean result = vertexData.length == EncodingFormat.QUAD_STRIDE;
+
+        if (!result && logCompatibilityWarning) {
+            logCompatibilityWarning = false;
+            Indigo.LOGGER.warn("[Indigo] Encountered baked quad with non-standard vertex format. Some blocks will not be rendered");
+        }
+
+        return result;
+    }
+
+    public static boolean canRender(int[] vertexData) {
+        return !Indigo.ENSURE_VERTEX_FORMAT_COMPATIBILITY || isCompatible(vertexData);
+    }
 }

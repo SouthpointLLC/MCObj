@@ -70,7 +70,7 @@ public class CuboidMixin implements CBA {
 
 	@Inject(method = "addChild", at = @At("RETURN"))
 	public void mcobj_onAddChild(ModelPart child, CallbackInfo cbi) {
-		((CBA)child).mcobj_setParentRenderer(this);
+		((CBA)(Object) child).mcobj_setParentRenderer(this);
 	}
 
 	@Override

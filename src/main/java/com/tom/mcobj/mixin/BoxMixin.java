@@ -5,15 +5,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.model.ModelPart.Cuboid;
-import net.minecraft.client.util.math.Vector3f;
-
 import com.tom.mcobj.Access.BXA;
+
+import net.minecraft.client.model.ModelPart.Cuboid;
+import net.minecraft.util.math.Vec3f;
 
 @Mixin(Cuboid.class)
 public class BoxMixin implements BXA {
 	public int mcobj_texU, mcobj_texV;
-	public Vector3f mcobj_delta;
+	public Vec3f mcobj_delta;
 
 	@Inject(method = "<init>(IIFFFFFFFFFZFF)V", at = @At("RETURN"))
 	public void onInit(int iu, int iv, float minX, float minY, float minZ,
@@ -21,7 +21,7 @@ public class BoxMixin implements BXA {
 			boolean boolean_1, float u, float v, CallbackInfo info) {
 		mcobj_texU = iu;
 		mcobj_texV = iv;
-		mcobj_delta = new Vector3f(dx, dy, dz);
+		mcobj_delta = new Vec3f(dx, dy, dz);
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class BoxMixin implements BXA {
 	}
 
 	@Override
-	public Vector3f mcobj_getDelta() {
+	public Vec3f mcobj_getDelta() {
 		return mcobj_delta;
 	}
 }

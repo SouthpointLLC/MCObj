@@ -1,15 +1,13 @@
 package com.tom.mcobj.proxy;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.resource.ReloadableResourceManager;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.SinglePreparationResourceReloadListener;
-import net.minecraft.util.profiler.Profiler;
-import net.minecraft.world.World;
-
 import com.tom.mcobj.EntityModelLoader;
 import com.tom.mcobj.Remap;
 import com.tom.mcobj.forge.Fabric.OBJLoader;
+
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.resource.*;
+import net.minecraft.util.profiler.Profiler;
+import net.minecraft.world.World;
 
 public class ClientProxy extends CommonProxy {
 	public static EntityModelLoader loader;
@@ -25,8 +23,8 @@ public class ClientProxy extends CommonProxy {
 
 	private void loadModelLoader() {
 		ResourceManager mngr = MinecraftClient.getInstance().getResourceManager();
-		if(mngr instanceof ReloadableResourceManager) {
-			((ReloadableResourceManager)mngr).registerListener(new SinglePreparationResourceReloadListener<EntityModelLoader>(){
+		if(mngr instanceof ReloadableResourceManagerImpl) {
+			((ReloadableResourceManagerImpl)mngr).registerReloader(new SinglePreparationResourceReloader<EntityModelLoader>(){
 
 				@Override
 				protected EntityModelLoader prepare(ResourceManager resourceManagerIn, Profiler profilerIn) {

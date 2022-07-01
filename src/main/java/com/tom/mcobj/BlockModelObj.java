@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -31,6 +30,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 
 import com.mojang.datafixers.util.Pair;
@@ -46,6 +46,7 @@ import com.tom.mcobj.forge.OBJModel.OBJBakedModel;
 import com.tom.mcobj.forge.TRSRTransformation;
 
 public class BlockModelObj extends JsonUnbakedModel {
+    
 	public static class BakedObjModel implements BakedModel, FabricBakedModel {
 		private BakedModel parent;
 		private Sprite particle;
@@ -87,7 +88,7 @@ public class BlockModelObj extends JsonUnbakedModel {
 			return parent.isBuiltin();
 		}
 		@Override
-		public Sprite getSprite() {
+		public Sprite getParticleSprite() {
 			return particle;
 		}
 		@Override
@@ -120,7 +121,7 @@ public class BlockModelObj extends JsonUnbakedModel {
 	private OBJModel parent;
 
 	public BlockModelObj(OBJModel parent) {
-		super(new Identifier("block/block"), Collections.emptyList(), Collections.emptyMap(), true, GuiLight.field_21858, ModelTransformation.NONE, Collections.emptyList());
+		super(new Identifier("block/block"), Collections.emptyList(), Collections.emptyMap(), true, GuiLight.BLOCK, ModelTransformation.NONE, Collections.emptyList());
 		this.parent = parent;
 	}
 	@Override
@@ -136,7 +137,7 @@ public class BlockModelObj extends JsonUnbakedModel {
 	public BakedModel bake(ModelLoader bakery, JsonUnbakedModel caller, Function<SpriteIdentifier, Sprite> spriteGetter,
 			ModelBakeSettings sprite, Identifier identifier_1, boolean boolean_1) {
 		ImmutableMap.Builder<String, Sprite> builder = ImmutableMap.builder();
-		Sprite missing = spriteGetter.apply(new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEX, new Identifier("missingno")));
+		Sprite missing = spriteGetter.apply(new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier("missingno")));
 		try {
 			MaterialLibrary ml = parent.getMatLib();
 			for (String mat : ml.getMaterialNames()) {

@@ -1,11 +1,11 @@
 package com.tom.mcobj.forge;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -57,21 +57,22 @@ public class Fabric {
 			if (!cache.containsKey(file))
 			{
 				Resource resource = null;
+				Identifier id = null;
 				try
 				{
 					try
 					{
-						resource = manager.getResource(file);
+						resource = manager.getResource(id = file).orElseThrow();
 					}
-					catch (FileNotFoundException e)
+					catch (NoSuchElementException e)
 					{
 						if (modelLocation.getPath().startsWith("models/block/"))
-							resource = manager.getResource(new Identifier(file.getNamespace(), "models/item/" + file.getPath().substring("models/block/".length())));
+							resource = manager.getResource(id = new Identifier(file.getNamespace(), "models/item/" + file.getPath().substring("models/block/".length()))).orElseThrow();
 						else if (modelLocation.getPath().startsWith("models/item/"))
-							resource = manager.getResource(new Identifier(file.getNamespace(), "models/block/" + file.getPath().substring("models/item/".length())));
+							resource = manager.getResource(id = new Identifier(file.getNamespace(), "models/block/" + file.getPath().substring("models/item/".length()))).orElseThrow();
 						else throw e;
 					}
-					OBJModel.Parser parser = new OBJModel.Parser(resource, manager);
+					OBJModel.Parser parser = new OBJModel.Parser(id, resource, manager);
 					OBJModel model = null;
 					try
 					{
@@ -88,7 +89,7 @@ public class Fabric {
 				}
 				finally
 				{
-					IOUtils.closeQuietly(resource);
+					IOUtils.closeQuietly(resource.getInputStream());
 				}
 			}
 			OBJModel model = cache.get(file);
